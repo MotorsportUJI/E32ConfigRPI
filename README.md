@@ -8,5 +8,5 @@ Tx --> gpio15(Rxd)
 AUX --> disconnected  
 Vcc --> 3.3  
 Gnd --> Gnd  
-Remember to set up the serial port so it is not being used by the system: The primary uart
+Remember to set up the serial port so it is not being used by the system: The primary uart  
 https://www.raspberrypi.org/documentation/configuration/uart.md
