@@ -28,6 +28,7 @@ class Receive(threading.Thread):
                 x = int.from_bytes(byte_received, byteorder="big")
                 print(Fore.MAGENTA + "{:02X}".format(x) + Fore.reset, end=" ", flush=True)
                 received = True
+                actual_ms = int(time.time() * 1000)
             elif (int(time.time() * 1000) - actual_ms) > 1000 and received:
                 print("")
                 received = False
