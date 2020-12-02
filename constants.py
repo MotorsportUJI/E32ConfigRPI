@@ -206,6 +206,17 @@ class Config_view(Frame):
         self.chan.grid(row=2, column=0)
 
         # option
+        self.transmission_power = LabeledComboBox(self, text="Tpower: ", values=list(power))
+        self.transmission_power.grid(row=3, column=0)
+        self.fec_switch = LabeledComboBox(self, text="Fec: ", values=list(fec_switch))
+        self.fec_switch.grid(row=3,column=1)
+        self.wake_time =LabeledComboBox(self, text="WakeT: ", values=list(wake_time))
+        self.wake_time.grid(row=3, column=2)
+        self.io_resistences = LabeledComboBox(self, text="Resistences: ", values=list(resistence_type))
+        self.io_resistences.grid(row=4, column=0)
+        self.fixed_transmission_enbled =LabeledComboBox(self, text = "TMode: ", values=list(transmission_type))
+        self.fixed_transmission_enbled.grid(row=4,column=1)
+
 
     def ReadData(self):
         send_hex(bytes([0xc1] * 3))
