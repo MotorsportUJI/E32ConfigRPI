@@ -71,6 +71,6 @@ btn_op = Button(gui, text="Read Operating Parameters", command=read_operating_pa
 btn_op.grid(row=2, column=0, sticky=E+W)
 
 # config gui
-vGUI = Config_view(gui).grid(row=10, column=0, sticky=E+W, columnspan=5)
+vGUI = Config_view(gui, config).grid(row=10, column=0, sticky=E+W, columnspan=5)
 
 gui.mainloop()

@@ -179,19 +179,33 @@ class LabeledComboBox(Frame):
         self.l = Label(self, text=text, justify=LEFT).grid(sticky = W, column=0, row=0)
         self.c =ttk.Combobox(self,values=val,state="readonly", *args, **kargs).grid(sticky = E, column=1, row=0)
 
-
 class Config_view(Frame):
     def __init__(self, parent, configOBJ, *args, **kwags):
         self.config = configOBJ
         Frame.__init__(self, parent)
         self.head = LabeledComboBox(self, text="HEAD: ", values=["0xC0","0xC2"])
-        self.head.pack(side = LEFT)
+        #self.head.pack(side = LEFT)
+        self.head.grid(row=0, column=0)
 
-        self.addh = LabeledEntry(self, text="ADDH: ",)
-        self.addh.pack(side = LEFT)
+        self.addh = LabeledEntry(self, text="ADDH: ")
+        #self.addh.pack(side = LEFT)
+        self.addh.grid(row=0, column=1)
 
-        self.addl = LabeledEntry(self, text="ADDL: ", )
-        self.addl.pack(side = LEFT)
+        self.addl = LabeledEntry(self, text="ADDL: ")
+        #self.addl.pack(side = LEFT)
+        self.addl.grid(row=0, column=2)
+        # sped
+        self.airBr = LabeledComboBox(self, text="AirBR: ", values=list(air_baudrate))
+        self.airBr.grid(row=1, column=0)
+        self.uartBr = LabeledComboBox(self, text="uartBR", values=list(uart_baudrate))
+        self.uartBr.grid(row=1, column=1)
+        self.parity = LabeledComboBox(self, text="uartParity", values=list(uart_parity))
+        self.parity.grid(row=1, column=2)
+        self.chan = LabeledEntry(self, text="CHAN: ")
+        # self.chan.pack()
+        self.chan.grid(row=2, column=0)
+
+        # option
 
     def ReadData(self):
         send_hex(bytes([0xc1] * 3))
@@ -199,10 +213,10 @@ class Config_view(Frame):
         self.config.from_bytes(x)
         self.updateGUI()
 
-    def writeGUI(self): # put info from config object to view
+#    def writeGUI(self): # put info from config object to view
 
 
-    def readGUI(self): # read info from view and put it in config object
+#    def readGUI(self): # read info from view and put it in config object
 
     def SendData(self):
         self.readGUI()
