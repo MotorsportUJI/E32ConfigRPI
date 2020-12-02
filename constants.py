@@ -1,57 +1,91 @@
+from tkinter import *
+from tkinter import ttk
 # ALL
 
 # speed constants
 # bits      76
-UART_8N1 = "00"  # default
-UART_8O1 = "01"
-UART_8E1 = "10"
+uart_parity = {
+"UART_8N1" : "00",  # default
+"UART_8O1" : "01",
+"UART_8E1" : "10"}
+
 #bits                 543
-UART_BAUDRATE_1200 = "000"
-UART_BAUDRATE_2400 = "001"
-UART_BAUDRATE_4800 = "010"
-UART_BAUDRATE_9600 = "011"  # default
-UART_BAUDRATE_19200 = "100"
-UART_BAUDRATE_38400 = "101"
-UART_BAUDRATE_57600 = "110"
-UART_BAUDRATE_115200 = "111"
+uart_baudrate = {
+"UART_BAUDRATE_1200" : "000",
+"UART_BAUDRATE_2400" : "001",
+"UART_BAUDRATE_4800" : "010",
+"UART_BAUDRATE_9600" : "011"  ,# default
+"UART_BAUDRATE_19200" : "100",
+"UART_BAUDRATE_38400" : "101",
+"UART_BAUDRATE_57600" : "110",
+"UART_BAUDRATE_115200" : "111"}
 
 #bits               210
-AIR_BAUDRATE_300 = "000"
-AIR_BAUDRATE_1200 = "001"
-AIR_BAUDRATE_2400 = "010"  # default
-AIR_BAUDRATE_4800 = "011"
-AIR_BAUDRATE_9600 = "100"
-AIR_BAUDRATE_19200 = "101"
+air_baudrate = {
+"AIR_BAUDRATE_300" : "000",
+"AIR_BAUDRATE_1200" : "001",
+"AIR_BAUDRATE_2400" : "010", # default
+"AIR_BAUDRATE_4800" : "011",
+"AIR_BAUDRATE_9600" : "100",
+"AIR_BAUDRATE_19200" : "101"}
 
 # options constants
 # bits                      7
-TRANSPARENT_TRANSMISSION = "0"
-FIXED_TRANSMISSION = "1"    # default
+transmission_type = {
+"TRANSPARENT_TRANSMISSION" : "0",
+"FIXED_TRANSMISSION" : "1"}    # default
 # bits            6
-IO_RESISTENCES = "1"  # default
-IO_WITHOUT_RESISTENCES = "0"
+resistence_type = {
+"IO_RESISTENCES" : "1",  # default
+"IO_WITHOUT_RESISTENCES" : "0"}
 #bits            543
-WAKE_TIME_250 = "000"  # default
-WAKE_TIME_500 = "001"
-WAKE_TIME_1000 = "010"
-WAKE_TIME_1250 = "100"
-WAKE_TIME_1750 = "101"
-WAKE_TIME_2000 = "111"
+wake_time = {
+"WAKE_TIME_250" : "000" , # default
+"WAKE_TIME_500" : "001",
+"WAKE_TIME_1000" : "010",
+"WAKE_TIME_1250" : "100",
+"WAKE_TIME_1750" : "101",
+"WAKE_TIME_2000" : "111"}
 #bits            2
-FEC_SWITCH_ON = "1"  # default
-FEC_SWITCH_OFF = "0"
+fec_switch = {
+"FEC_SWITCH_ON" : "1",  # default
+"FEC_SWITCH_OFF" : "0"}
 #bits                   10
-TRANSMISION_POWER_30 = "00"  # default
-TRANSMISION_POWER_27 = "01"
-TRANSMISION_POWER_24 = "10"
-TRANSMISION_POWER_21 = "11"
+power = {
+"TRANSMISION_POWER_30" : "00", # default
+"TRANSMISION_POWER_27" : "01",
+"TRANSMISION_POWER_24" : "10",
+"TRANSMISION_POWER_21" : "11"}
+
+def send_hex(h):
+    print("Sending to uart: ", end="")
+    for i in h:
+        print("{:02X}".format(i), end=" ")
+    print("")
+
+
+def get_hex(l):
+    while True:
+        x = input("Getting data from uart: ")
+        result = []
+        try:
+            for i in x.split():
+                if len(i) != 2:
+                    raise ValueError
+                else:
+                    n = int(i, 16)
+                    result.append(n)
+            result_b = bytearray(result)
+            return result_b
+        except ValueError:
+            print("Invalid Input!")
 
 
 class Speed:
     def __init__(self):
-        self.air_baud_rate = AIR_BAUDRATE_2400
-        self.uart_baud_rate = UART_BAUDRATE_9600
-        self.uart_parity_bit = UART_8N1
+        self.air_baud_rate = air_baudrate["AIR_BAUDRATE_2400"]
+        self.uart_baud_rate = uart_baudrate["UART_BAUDRATE_9600"]
+        self.uart_parity_bit = uart_parity["UART_8N1"]
 
     def to_bytes(self):
         # al reves pues son little endian
@@ -71,11 +105,11 @@ class Speed:
 
 class Option:
     def __init__(self):
-        self.fixed_transmission_enbled = TRANSPARENT_TRANSMISSION
-        self.io_resistences = IO_RESISTENCES
-        self.wake_time = WAKE_TIME_250
-        self.fec_switch = FEC_SWITCH_ON
-        self.transmission_power = TRANSMISION_POWER_30
+        self.fixed_transmission_enbled = transmission_type["TRANSPARENT_TRANSMISSION"]
+        self.io_resistences = resistence_type["IO_RESISTENCES"]
+        self.wake_time = wake_time["WAKE_TIME_250"]
+        self.fec_switch = fec_switch["FEC_SWITCH_ON"]
+        self.transmission_power = power["TRANSMISION_POWER_30"]
 
     def to_bytes(self):
         # al reves pues son little endian
@@ -116,4 +150,62 @@ class Configuration:
         self.chan = int(bArray[4])
         self.option.from_bytes(bArray[5])
 
+
+class LabeledEntry(Frame):
+    def __init__(self, parent, *args, **kargs):
+        text = kargs.pop("text")
+        Frame.__init__(self, parent)
+        self.l = Label(self, text=text, justify=LEFT).grid(sticky = W, column=0, row=0)
+        self.e =Entry(self, *args, **kargs).grid(sticky = E, column=1, row=0)
+
+
+class LabeledLabel(Frame):
+    def __init__(self, parent, *args, **kargs):
+        text = kargs.pop("text")
+        self.text2 = StringVar()
+        Frame.__init__(self, parent)
+        self.l1 = Label(self, text=text, justify=LEFT).grid(sticky=W, column=0, row=0)
+        self.l2 = Label(self, textvariable=self.text2,*args, **kargs).grid(sticky=E, column=1, row=0)
+
+    def settext(self, s):
+        self.text2.set(str(s))
+
+
+class LabeledComboBox(Frame):
+    def __init__(self, parent, *args, **kargs):
+        text = kargs.pop("text")
+        val = kargs.pop("values")
+        Frame.__init__(self, parent)
+        self.l = Label(self, text=text, justify=LEFT).grid(sticky = W, column=0, row=0)
+        self.c =ttk.Combobox(self,values=val,state="readonly", *args, **kargs).grid(sticky = E, column=1, row=0)
+
+
+class Config_view(Frame):
+    def __init__(self, parent, configOBJ, *args, **kwags):
+        self.config = configOBJ
+        Frame.__init__(self, parent)
+        self.head = LabeledComboBox(self, text="HEAD: ", values=["0xC0","0xC2"])
+        self.head.pack(side = LEFT)
+
+        self.addh = LabeledEntry(self, text="ADDH: ",)
+        self.addh.pack(side = LEFT)
+
+        self.addl = LabeledEntry(self, text="ADDL: ", )
+        self.addl.pack(side = LEFT)
+
+    def ReadData(self):
+        send_hex(bytes([0xc1] * 3))
+        x = get_hex(6)
+        self.config.from_bytes(x)
+        self.updateGUI()
+
+    def writeGUI(self): # put info from config object to view
+
+
+    def readGUI(self): # read info from view and put it in config object
+
+    def SendData(self):
+        self.readGUI()
+        x = self.config.to_bytes()
+        send_hex(x)
 
