@@ -2,6 +2,7 @@ from tkinter import *
 from constants import *
 import struct
 
+
 def send_hex(h):
     print("Sending to uart: ", end="")
     for i in h:
@@ -24,32 +25,6 @@ def get_hex(l):
             return result_b
         except ValueError:
             print("Invalid Input!")
-
-
-class Speed:
-    def __init__(self):
-        self.uart_parity_bit = UART_8N1
-        self.uart_baud_rate = UART_BAUDRATE_9600
-        self.air_baud_rate = AIR_BAUDRATE_2400
-
-
-
-class Option:
-    def __init__(self):
-
-
-class Configuration:
-    def __init__(self):
-
-        self.head = 0xC0
-        self.addh = 0x00
-        self.addl = 0x00
-
-        self.sped = Speed()
-        self.chan = 0x17
-        self.option = Option()
-
-
 
 
 class LabeledEntry(Frame):
@@ -77,6 +52,7 @@ gui = Tk()
 gui.title("Config EBYTE E32 LoRa")
 gui.geometry("700x350")
 
+config = Configuration()
 
 # reset command
 def reset_command():
@@ -123,8 +99,15 @@ btn_vn = Button(gui, text="Read version number", command=read_version_command)
 btn_vn.grid(row=1, column=0, sticky=E+W)
 
 
+def read_operating_parameters():
+    send_hex(bytes([0xc1]*3))
+    x = get_hex(6)
+    config.from_bytes(x)
+    send_hex(config.to_bytes())
+
+
 # btn read operating parameters
-btn_op = Button(gui, text="Read Operating Parameters")
+btn_op = Button(gui, text="Read Operating Parameters", command=read_operating_parameters)
 btn_op.grid(row=2, column=0, sticky=E+W)
 
 
