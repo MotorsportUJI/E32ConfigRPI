@@ -6,7 +6,6 @@ import serial
 serial_port = "/dev/serial0"
 ser = serial.Serial(serial_port)
 
-
 # speed constants
 # bits      76
 uart_parity = OrderedDict([
