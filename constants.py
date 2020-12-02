@@ -91,7 +91,7 @@ class Speed:
     def to_bytes(self):
         # al reves pues son little endian
         binary_string = self.uart_parity_bit + self.uart_baud_rate + self.air_baud_rate
-        binary_string = binary_string[::-1]
+        #binary_string = binary_string[::-1]
         b = bytes([int(binary_string, 2)])
         return b
 
@@ -101,7 +101,6 @@ class Speed:
         self.uart_parity_bit = bString[0:2]
         self.uart_baud_rate = bString[2:5]
         self.air_baud_rate = bString[5:8]
-
 
 
 class Option:
@@ -114,8 +113,8 @@ class Option:
 
     def to_bytes(self):
         # al reves pues son little endian
-        binary_string = self.transmission_power + self.fec_switch + self.wake_time + self.io_resistences + self.fixed_transmission_enbled
-        binary_string = binary_string[::-1]
+        binary_string = self.fixed_transmission_enbled + self.io_resistences + self.wake_time + self.fec_switch + self.transmission_power
+        # binary_string = binary_string[::-1]
         b = bytes([int(binary_string, 2)])
         return b
 
@@ -157,14 +156,32 @@ class LabeledEntry(Frame):
         text = kargs.pop("text")
         self.txt = StringVar()
         Frame.__init__(self, parent)
+
+        vcmd = (parent.register(self.validate),'%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
+
         self.l = Label(self, text=text, justify=LEFT, width=10).grid(sticky = W, column=0, row=0)
-        self.e =Entry(self, width=10, textvariable=self.txt).grid(sticky = E, column=1, row=0)
+        self.e =Entry(self, width=10, textvariable=self.txt, validate="key", validatecommand=vcmd)
+        self.e.grid(sticky = E, column=1, row=0)
 
     def setText(self, txt):
         self.txt.set(txt)
 
     def getText(self):
         return self.e.get()
+
+    def validate(self, action, index, value_if_allowed, prior_value, text, validation_type, trigger_type, widget_name):
+        #print(value_if_allowed)
+        if value_if_allowed[:2] == "0x":
+            try:
+                x = int(value_if_allowed[2:], 16)
+                if x > 0xFF:
+                    return False
+            except ValueError:
+                return False
+            return True
+        else:
+            return False
+
 
 
 class LabeledLabel(Frame):
@@ -191,6 +208,10 @@ class LabeledComboBox(Frame):
 
     def current(self, cur):
         self.c.current(cur)
+
+    def get_current(self):
+        return self.c.get()
+
 
 class Config_view(Frame):
     def __init__(self, parent, configOBJ, *args, **kwags):
@@ -275,9 +296,6 @@ class Config_view(Frame):
         i = self.getIndexFromValue(power, self.config.option.transmission_power)
         self.transmission_power.current(i)
 
-
-
-
     def getIndexFromValue(self, oDict, val):
         r = 0
         for k, v in oDict.items():
@@ -286,11 +304,43 @@ class Config_view(Frame):
             r += 1
         return None
 
-
     def readGUI(self): # read info from view and put it in config object
 
-        addh = self.addh.get()
-        self.config.addh =
+        addh = self.addh.getText()[2:]
+        self.config.addh = int(addh, 16)
+
+        addl = self.addl.getText()[2:]
+        self.config.addl = int(addl, 16)
+
+        chan = self.chan.getText()[2:]
+        self.config.chan = int(chan, 16)
+
+        # Speed
+        i = self.airBr.get_current()
+        self.config.sped.air_baud_rate = air_baudrate[i]
+
+        i = self.uartBr.get_current()
+        self.config.sped.uart_baud_rate = uart_baudrate[i]
+
+        i = self.parity.get_current()
+        self.config.sped.uart_parity_bit = uart_parity[i]
+
+        # Options
+        i = self.fixed_transmission_enbled.get_current()
+        self.config.option.fixed_transmission_enbled = transmission_type[i]
+
+        i = self.io_resistences.get_current()
+        self.config.option.io_resistences = resistence_type[i]
+
+        i = self.wake_time.get_current()
+        self.config.option.wake_time = wake_time[i]
+
+        i = self.fec_switch.get_current()
+        self.config.option.fec_switch = fec_switch[i]
+
+        i = self.transmission_power.get_current()
+        self.config.option.transmission_power = power[i]
+
 
     def SendData(self):
         self.readGUI()
