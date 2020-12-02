@@ -1,61 +1,62 @@
 from tkinter import *
 from tkinter import ttk
+from collections import OrderedDict
 # ALL
 
 # speed constants
 # bits      76
-uart_parity = {
-"UART_8N1" : "00",  # default
-"UART_8O1" : "01",
-"UART_8E1" : "10"}
+uart_parity = OrderedDict([
+    ("8N1" , "00"),  # default
+     ("8O1" , "01"),
+      ("8E1" , "10")])
 
 #bits                 543
-uart_baudrate = {
-"UART_BAUDRATE_1200" : "000",
-"UART_BAUDRATE_2400" : "001",
-"UART_BAUDRATE_4800" : "010",
-"UART_BAUDRATE_9600" : "011"  ,# default
-"UART_BAUDRATE_19200" : "100",
-"UART_BAUDRATE_38400" : "101",
-"UART_BAUDRATE_57600" : "110",
-"UART_BAUDRATE_115200" : "111"}
+uart_baudrate = OrderedDict([
+    ("1200" , "000"),
+     ("2400" , "001"),
+      ("4800" , "010"),
+       ("9600" , "011"),# default
+        ("19200" , "100"),
+         ("38400" , "101"),
+          ("57600" , "110"),
+           ("115200" , "111")])
 
 #bits               210
-air_baudrate = {
-"AIR_BAUDRATE_300" : "000",
-"AIR_BAUDRATE_1200" : "001",
-"AIR_BAUDRATE_2400" : "010", # default
-"AIR_BAUDRATE_4800" : "011",
-"AIR_BAUDRATE_9600" : "100",
-"AIR_BAUDRATE_19200" : "101"}
+air_baudrate = OrderedDict([
+    ("300" , "000"),
+     ("1200" , "001"),
+      ("2400" , "010"), # default
+       ("4800" , "011"),
+        ("9600" , "100"),
+         ("19200" , "101")])
 
 # options constants
 # bits                      7
-transmission_type = {
-"TRANSPARENT_TRANSMISSION" : "0",
-"FIXED_TRANSMISSION" : "1"}    # default
+transmission_type = OrderedDict([
+    ("TRANSP" , "0"),
+     ("FIXED" , "1")])    # default
 # bits            6
-resistence_type = {
-"IO_RESISTENCES" : "1",  # default
-"IO_WITHOUT_RESISTENCES" : "0"}
+resistence_type = OrderedDict([
+    ("WITH" , "1"),  # default
+                  ("WHITHOUT" , "0")])
 #bits            543
-wake_time = {
-"WAKE_TIME_250" : "000" , # default
-"WAKE_TIME_500" : "001",
-"WAKE_TIME_1000" : "010",
-"WAKE_TIME_1250" : "100",
-"WAKE_TIME_1750" : "101",
-"WAKE_TIME_2000" : "111"}
+wake_time = OrderedDict([
+    ("250ms" , "000" ), # default
+     ("500ms" , "001"),
+      ("1000ms" , "010"),
+       ("1250ms" , "100"),
+        ("1750ms" , "101"),
+         ("2000ms" , "111")])
 #bits            2
-fec_switch = {
-"FEC_SWITCH_ON" : "1",  # default
-"FEC_SWITCH_OFF" : "0"}
+fec_switch = OrderedDict([
+    ("ON" , "1"),  # default
+     ("OFF" , "0")])
 #bits                   10
-power = {
-"TRANSMISION_POWER_30" : "00", # default
-"TRANSMISION_POWER_27" : "01",
-"TRANSMISION_POWER_24" : "10",
-"TRANSMISION_POWER_21" : "11"}
+power = OrderedDict([
+    ("30dbi" , "00"), # default
+     ("27dbi" , "01"),
+      ("24dbi" , "10"),
+       ("21dbi" , "11")])
 
 def send_hex(h):
     print("Sending to uart: ", end="")
@@ -83,33 +84,33 @@ def get_hex(l):
 
 class Speed:
     def __init__(self):
-        self.air_baud_rate = air_baudrate["AIR_BAUDRATE_2400"]
-        self.uart_baud_rate = uart_baudrate["UART_BAUDRATE_9600"]
-        self.uart_parity_bit = uart_parity["UART_8N1"]
+        self.air_baud_rate = air_baudrate["2400"]
+        self.uart_baud_rate = uart_baudrate["9600"]
+        self.uart_parity_bit = uart_parity["8N1"]
 
     def to_bytes(self):
         # al reves pues son little endian
-        binary_string = self.air_baud_rate + self.uart_baud_rate + self.uart_parity_bit
+        binary_string = self.uart_parity_bit + self.uart_baud_rate + self.air_baud_rate
         binary_string = binary_string[::-1]
         b = bytes([int(binary_string, 2)])
         return b
 
     def from_bytes(self, bArray):
         bString = "{0:0>8b}".format(bArray)
-        bString = bString[::-1]
-        self.air_baud_rate = bString[0:3]
-        self.uart_baud_rate = bString[3:6]
-        self.uart_parity_bit = bString[6:8]
+        # bString = bString[::-1]
+        self.uart_parity_bit = bString[0:2]
+        self.uart_baud_rate = bString[2:5]
+        self.air_baud_rate = bString[5:8]
 
 
 
 class Option:
     def __init__(self):
-        self.fixed_transmission_enbled = transmission_type["TRANSPARENT_TRANSMISSION"]
-        self.io_resistences = resistence_type["IO_RESISTENCES"]
-        self.wake_time = wake_time["WAKE_TIME_250"]
-        self.fec_switch = fec_switch["FEC_SWITCH_ON"]
-        self.transmission_power = power["TRANSMISION_POWER_30"]
+        self.fixed_transmission_enbled = transmission_type["TRANSP"]
+        self.io_resistences = resistence_type["WITH"]
+        self.wake_time = wake_time["250ms"]
+        self.fec_switch = fec_switch["ON"]
+        self.transmission_power = power["30dbi"]
 
     def to_bytes(self):
         # al reves pues son little endian
@@ -120,12 +121,12 @@ class Option:
 
     def from_bytes(self, bArray):
         bString = "{0:0>8b}".format(bArray)
-        bString = bString[::-1]
-        self.transmission_power = bString[0:2]
-        self.fec_switch = bString[2]
-        self.wake_time = bString[3:6]
-        self.io_resistences = bString[6]
-        self.fixed_transmission_enbled = bString[7]
+        # bString = bString[::-1]
+        self.fixed_transmission_enbled = bString[0]
+        self.io_resistences = bString[1]
+        self.wake_time = bString[2:5]
+        self.fec_switch = bString[5]
+        self.transmission_power = bString[6:8]
 
 
 class Configuration:
@@ -154,9 +155,16 @@ class Configuration:
 class LabeledEntry(Frame):
     def __init__(self, parent, *args, **kargs):
         text = kargs.pop("text")
+        self.txt = StringVar()
         Frame.__init__(self, parent)
-        self.l = Label(self, text=text, justify=LEFT).grid(sticky = W, column=0, row=0)
-        self.e =Entry(self, *args, **kargs).grid(sticky = E, column=1, row=0)
+        self.l = Label(self, text=text, justify=LEFT, width=10).grid(sticky = W, column=0, row=0)
+        self.e =Entry(self, width=10, textvariable=self.txt).grid(sticky = E, column=1, row=0)
+
+    def setText(self, txt):
+        self.txt.set(txt)
+
+    def getText(self):
+        return self.e.get()
 
 
 class LabeledLabel(Frame):
@@ -165,7 +173,7 @@ class LabeledLabel(Frame):
         self.text2 = StringVar()
         Frame.__init__(self, parent)
         self.l1 = Label(self, text=text, justify=LEFT).grid(sticky=W, column=0, row=0)
-        self.l2 = Label(self, textvariable=self.text2,*args, **kargs).grid(sticky=E, column=1, row=0)
+        self.l2 = Label(self, textvariable=self.text2).grid(sticky=E, column=1, row=0)
 
     def settext(self, s):
         self.text2.set(str(s))
@@ -176,14 +184,19 @@ class LabeledComboBox(Frame):
         text = kargs.pop("text")
         val = kargs.pop("values")
         Frame.__init__(self, parent)
-        self.l = Label(self, text=text, justify=LEFT).grid(sticky = W, column=0, row=0)
-        self.c =ttk.Combobox(self,values=val,state="readonly", *args, **kargs).grid(sticky = E, column=1, row=0)
+        self.l = Label(self, text=text, justify=LEFT, width=10)
+        self.l.grid(sticky = W, column=0, row=0)
+        self.c =ttk.Combobox(self,values=val,state="readonly",width=10)
+        self.c.grid(sticky = E, column=1, row=0)
+
+    def current(self, cur):
+        self.c.current(cur)
 
 class Config_view(Frame):
     def __init__(self, parent, configOBJ, *args, **kwags):
         self.config = configOBJ
         Frame.__init__(self, parent)
-        self.head = LabeledComboBox(self, text="HEAD: ", values=["0xC0","0xC2"])
+        self.head = LabeledComboBox(self, text="HEAD: ", values=["0xC0"])
         #self.head.pack(side = LEFT)
         self.head.grid(row=0, column=0)
 
@@ -224,10 +237,60 @@ class Config_view(Frame):
         self.config.from_bytes(x)
         self.updateGUI()
 
-#    def writeGUI(self): # put info from config object to view
+    def updateGUI(self):  # put info from config object to view
+        self.head.current(0)  # CONSTANT
+
+        addh = self.config.addh
+        self.addh.setText("0x{:0>2X}".format(addh))
+
+        addl = self.config.addl
+        self.addl.setText("0x{:0>2X}".format(addl))
+
+        chan = self.config.chan
+        self.chan.setText("0x{:0>2X}".format(chan))
+
+        # sped
+        i = self.getIndexFromValue(air_baudrate, self.config.sped.air_baud_rate)
+        self.airBr.current(i)
+
+        i = self.getIndexFromValue(uart_baudrate, self.config.sped.uart_baud_rate)
+        self.uartBr.current(i)
+
+        i = self.getIndexFromValue(uart_parity, self.config.sped.uart_parity_bit)
+        self.parity.current(i)
+
+        #options
+        i = self.getIndexFromValue(transmission_type, self.config.option.fixed_transmission_enbled)
+        self.fixed_transmission_enbled.current(i)
+
+        i = self.getIndexFromValue(resistence_type, self.config.option.io_resistences)
+        self.io_resistences.current(i)
+
+        i = self.getIndexFromValue(wake_time, self.config.option.wake_time)
+        self.wake_time.current(i)
+
+        i = self.getIndexFromValue(fec_switch, self.config.option.fec_switch)
+        self.fec_switch.current(i)
+
+        i = self.getIndexFromValue(power, self.config.option.transmission_power)
+        self.transmission_power.current(i)
 
 
-#    def readGUI(self): # read info from view and put it in config object
+
+
+    def getIndexFromValue(self, oDict, val):
+        r = 0
+        for k, v in oDict.items():
+            if v == val:
+                return r
+            r += 1
+        return None
+
+
+    def readGUI(self): # read info from view and put it in config object
+
+        addh = self.addh.get()
+        self.config.addh =
 
     def SendData(self):
         self.readGUI()

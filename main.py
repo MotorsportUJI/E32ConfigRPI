@@ -59,18 +59,17 @@ btn_vn = Button(gui, text="Read version number", command=read_version_command)
 btn_vn.grid(row=1, column=0, sticky=E+W)
 
 
-def read_operating_parameters():
-    send_hex(bytes([0xc1]*3))
-    x = get_hex(6)
-    config.from_bytes(x)
-    send_hex(config.to_bytes())
-
+vGUI = Config_view(gui, config)
+vGUI.grid(row=3, column=0, sticky=E+W, columnspan=5)
 
 # btn read operating parameters
-btn_op = Button(gui, text="Read Operating Parameters", command=read_operating_parameters)
+btn_op = Button(gui, text="Read Operating Parameters", command=vGUI.ReadData)
 btn_op.grid(row=2, column=0, sticky=E+W)
 
-# config gui
-vGUI = Config_view(gui, config).grid(row=10, column=0, sticky=E+W, columnspan=5)
+# btn send operating parameters
+
+btn_snd = Button(gui, text="Send Operation Parameters", command=vGUI.SendData)
+btn_snd.grid(row=4, column=0, sticky=E+W)
+
 
 gui.mainloop()
