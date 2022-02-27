@@ -14,3 +14,4 @@ The primary uart https://www.raspberrypi.org/documentation/configuration/uart.md
 # Usage
 Execute main.py to execute the program, SerialBin.py is a helper script for sending raw commands to the serial device,
 to change the serial device modify the variable serial_port
+
