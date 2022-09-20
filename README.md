@@ -1,5 +1,5 @@
 # E32ConfigRPI
-Config your EBYTE E32 LoRa module with a raspberry pi  
+Config your EBYTE E32 LoRa module with a raspberry pi and a cool GUI
 Connections:  
 M0 --> 3.3v  
 M1 --> 3.3v  
